@@ -183,14 +183,23 @@ export default function App() {
     /* ─── Video ─── */
     const vEl = document.getElementById('vEl');
     const playOv = document.getElementById('playOv');
-    function handlePlayClick() {
-      playOv.style.display = 'none';
-      vEl.controls = true;
-      vEl.play();
+    async function handlePlayClick() {
+      // Call play() first so the browser registers user activation directly on the element
+      if (vEl) {
+        vEl.controls = true;
+        try {
+          await vEl.play();
+          if (playOv) playOv.style.display = 'none';
+        } catch (err) {
+          console.error("Video play failed:", err);
+          // If browser blocked it, make sure controls are visible so they can click native play button
+          vEl.controls = true;
+        }
+      }
     }
     function handleVideoEnded() {
-      playOv.style.display = 'flex';
-      vEl.controls = false;
+      if (playOv) playOv.style.display = 'flex';
+      if (vEl) vEl.controls = false;
     }
     if (vEl && playOv) {
       playOv.addEventListener('click', handlePlayClick);
@@ -547,7 +556,7 @@ export default function App() {
             <div className="ddot"></div><div className="dline"></div>
           </div>
           <div className="video-wrap" id="vWrap">
-            <video className="video-el" id="vEl" preload="metadata">
+            <video className="video-el" id="vEl" preload="metadata" playsInline webkit-playsinline="true">
              <source src="/video.MP4" type="video/mp4" />
             </video>
             <div className="play-ov" id="playOv">
