@@ -355,12 +355,33 @@
 
 /* ─── Video ─── */
 .video-wrap {
-  position: relative; border-radius: 18px; overflow: hidden;
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
   border: 0.5px solid var(--gold-edge);
   background: var(--ink2);
-  cursor: pointer; aspect-ratio: 16/9;
+  cursor: pointer;
+  aspect-ratio: 16 / 9;
 }
-.video-el { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.video-el {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Fullscreen */
+.video-el:fullscreen {
+  object-fit: contain;
+  background: #000;
+}
+
+/* Chrome, Edge, Safari */
+.video-el:-webkit-full-screen {
+  object-fit: contain;
+  background: #000;
+}
 .play-ov {
   position: absolute; inset: 0;
   display: flex; flex-direction: column;

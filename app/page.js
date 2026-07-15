@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect } from 'react';
 
 export default function App() {
@@ -6,6 +8,8 @@ export default function App() {
      mount-time effect. Logic is unchanged — only wrapped so it
      runs after React has rendered the DOM, and cleaned up on
      unmount so nothing double-registers in dev/StrictMode.
+     We changed the API URLs from http://localhost:7006/send-* to
+     relative /api/send-* endpoints.
   ════════════════════════════════════════════════════════════ */
   useEffect(() => {
     const canvas = document.getElementById('starCanvas');
@@ -242,7 +246,7 @@ export default function App() {
       }
 
       try {
-        const response = await fetch('http://localhost:7006/send-wish', {
+        const response = await fetch('/api/send-wish', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ from_name: name, message: msg }),
@@ -287,20 +291,55 @@ export default function App() {
     btnYes.addEventListener('click', handleYes);
     btnNo.addEventListener('click', handleNo);
 
-    function handleRsvpSend() {
-      const name = document.getElementById('rName').value.trim();
+    async function handleRsvpSend() {
+      const nameEl = document.getElementById('rName');
+      const guestsEl = document.getElementById('rGuests');
+      const msgEl = document.getElementById('rMsg');
+      
+      const name = nameEl.value.trim();
+      const guests = guestsEl ? guestsEl.value : '';
+      const message = msgEl.value.trim();
+
       if (!rsvpChoice) { alert('Please let us know if you will attend.'); return; }
       if (!name) { alert('Please enter your name.'); return; }
 
-      rsvpForm.style.display = 'none';
-      rsvpBox.style.display = 'block';
+      rsvpSendBtn.disabled = true;
+      rsvpSendBtn.querySelector('.sb-text').textContent = 'Sending…';
 
-      if (rsvpChoice === 'yes') {
-        rsvpMsg.textContent = 'JazakAllah Khair, ' + name + '!';
-        rsvpSub.textContent = "We can't wait to celebrate with you.";
-      } else {
-        rsvpMsg.textContent = 'Thank you, ' + name + '.';
-        rsvpSub.textContent = 'We will miss you — may Allah bless you always.';
+      try {
+        const response = await fetch('/api/send-rsvp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name,
+            attending: rsvpChoice,
+            guests,
+            message
+          }),
+        });
+        const data = await response.json();
+
+        if (data.ok) {
+          rsvpForm.style.display = 'none';
+          rsvpBox.style.display = 'block';
+
+          if (rsvpChoice === 'yes') {
+            rsvpMsg.textContent = 'JazakAllah Khair, ' + name + '!';
+            rsvpSub.textContent = "We can't wait to celebrate with you.";
+          } else {
+            rsvpMsg.textContent = 'Thank you, ' + name + '.';
+            rsvpSub.textContent = 'We will miss you — may Allah bless you always.';
+          }
+        } else {
+          rsvpSendBtn.disabled = false;
+          rsvpSendBtn.querySelector('.sb-text').textContent = 'Send RSVP';
+          alert(data.error || 'Failed to send RSVP. Please try again.');
+        }
+      } catch (err) {
+        console.error(err);
+        rsvpSendBtn.disabled = false;
+        rsvpSendBtn.querySelector('.sb-text').textContent = 'Send RSVP';
+        alert('Failed to send RSVP. Please try again.');
       }
     }
     rsvpSendBtn.addEventListener('click', handleRsvpSend);
@@ -586,7 +625,7 @@ export default function App() {
 
           <div style={{ textAlign: 'center', marginBottom: '1.4rem' }}>
             <span style={{ fontFamily: "'Great Vibes',cursive", fontSize: 'clamp(30px,7vw,46px)', color: 'var(--gold-lt)' }}>Will You Attend?</span>
-            <p style={{ fontSize: '11px', letterSpacing: '0.35em', color: 'var(--text-muted)', textTransform: 'uppercase', marginTop: '0.25rem', fontStyle: 'normal', fontFamily: "'Lato',sans-serif" }}>Kindly let us know by July 10, 2026</p>
+            <p style={{ fontSize: '11px', letterSpacing: '0.35em', color: 'var(--text-muted)', textTransform: 'uppercase', marginTop: '0.25rem', fontStyle: 'normal', fontFamily: "'Lato',sans-serif" }}>Kindly let us know by July 18, 2026</p>
           </div>
 
           <div className="wish-form-wrap" id="rsvpForm">
