@@ -180,31 +180,7 @@ export default function App() {
       els.forEach(el => revealObserver.observe(el));
     }
 
-    /* ─── Video ─── */
-    const vEl = document.getElementById('vEl');
-    const playOv = document.getElementById('playOv');
-    async function handlePlayClick() {
-      // Call play() first so the browser registers user activation directly on the element
-      if (vEl) {
-        vEl.controls = true;
-        try {
-          await vEl.play();
-          if (playOv) playOv.style.display = 'none';
-        } catch (err) {
-          console.error("Video play failed:", err);
-          // If browser blocked it, make sure controls are visible so they can click native play button
-          vEl.controls = true;
-        }
-      }
-    }
-    function handleVideoEnded() {
-      if (playOv) playOv.style.display = 'flex';
-      if (vEl) vEl.controls = false;
-    }
-    if (vEl && playOv) {
-      playOv.addEventListener('click', handlePlayClick);
-      vEl.addEventListener('ended', handleVideoEnded);
-    }
+    /* ─── Video (controlled natively) ─── */
 
     /* ─── Countdown ─── */
     const TARGET = new Date('2026-07-18T10:30:00');
@@ -361,10 +337,7 @@ export default function App() {
       clearTimeout(splashTimeout);
       enterBtn.removeEventListener('click', handleEnter);
       if (revealObserver) revealObserver.disconnect();
-      if (vEl && playOv) {
-        playOv.removeEventListener('click', handlePlayClick);
-        vEl.removeEventListener('ended', handleVideoEnded);
-      }
+
       clearInterval(countdownInterval);
       sendBtn.removeEventListener('click', handleSendWish);
       btnYes.removeEventListener('click', handleYes);
@@ -556,20 +529,9 @@ export default function App() {
             <div className="ddot"></div><div className="dline"></div>
           </div>
           <div className="video-wrap" id="vWrap">
-            <video className="video-el" id="vEl" preload="metadata" playsInline webkit-playsinline="true">
+            <video className="video-el" id="vEl" preload="metadata" controls playsInline webkit-playsinline="true">
              <source src="/video.MP4" type="video/mp4" />
             </video>
-            <div className="play-ov" id="playOv">
-              <div className="play-rings">
-                <div className="pr1"></div>
-                <div className="pr2"></div>
-                <div className="pr3"></div>
-                <div className="play-icon">
-                  <i className="ti ti-player-play" aria-hidden="true"></i>
-                </div>
-              </div>
-              <span className="play-label">Watch our video</span>
-            </div>
           </div>
         </div>
 
